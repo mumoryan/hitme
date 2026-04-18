@@ -12,7 +12,7 @@ function client(): Anthropic {
 }
 
 export async function pickQuoteByContext(
-  eventTitle: string,
+  context: string,
   quotes: Quote[],
 ): Promise<Quote | null> {
   if (quotes.length === 0 || !API_KEY) return null
@@ -29,9 +29,9 @@ export async function pickQuoteByContext(
     messages: [
       {
         role: 'user',
-        content: `Calendar event: "${eventTitle}"
+        content: `Context: "${context}"
 
-Pick the single most motivating/relevant quote ID for someone about to attend this event. Return only the ID, nothing else.
+Pick the single most motivating/relevant quote ID for someone in this situation. Return only the ID, nothing else.
 
 Quotes:
 ${quoteList}`,

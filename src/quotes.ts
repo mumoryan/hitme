@@ -7,7 +7,7 @@ export interface Quote {
   author?: string
 }
 
-export const ESSENTIALS_50: Quote[] = [
+export const ESSENTIALS: Quote[] = [
   { id: 's01', category: 'stoic', text: 'You have power over your mind, not outside events. Realize this, and you will find strength.', author: 'Marcus Aurelius' },
   { id: 's02', category: 'stoic', text: 'The obstacle is the way.', author: 'Ryan Holiday' },
   { id: 's03', category: 'stoic', text: 'Waste no more time arguing what a good man should be. Be one.', author: 'Marcus Aurelius' },
@@ -60,4 +60,46 @@ export const ESSENTIALS_50: Quote[] = [
   { id: 'c14', category: 'calm', text: "Put down what you don't need to carry." },
   { id: 'c15', category: 'calm', text: 'Nothing to prove. Nowhere to be.' },
   { id: 'c16', category: 'calm', text: 'Let it be.', author: 'The Beatles' },
+
+  // Networking / social overwhelm
+  { id: 'n01', category: 'hustle', text: "Everyone you'll ever meet knows something you don't.", author: 'Bill Nye' },
+  { id: 'n02', category: 'calm', text: 'Be curious, not impressive. Ask one good question.' },
+  { id: 'n03', category: 'stoic', text: 'You can make more friends in two months by becoming interested in other people than in two years by trying to get other people interested in you.', author: 'Dale Carnegie' },
+  { id: 'n04', category: 'calm', text: 'They are nervous too. You are not alone in this room.' },
+
+  // Public speaking / presentation
+  { id: 'p01', category: 'hustle', text: 'The audience wants you to succeed. They are rooting for you.' },
+  { id: 'p02', category: 'stoic', text: 'Speak not because you have to say something, but because you have something to say.', author: 'Plato' },
+  { id: 'p03', category: 'calm', text: 'Nervousness is just excitement without breath. Breathe.' },
+  { id: 'p04', category: 'hustle', text: 'Once you start, the fear disappears. Start.' },
+
+  // Post-rejection (dating or job)
+  { id: 'r01', category: 'stoic', text: 'Rejection is redirection. The next door will open.' },
+  { id: 'r02', category: 'calm', text: "It wasn't the right fit — for either of you." },
+  { id: 'r03', category: 'hustle', text: 'The only way to guarantee failure is to stop trying.' },
+  { id: 'r04', category: 'stoic', text: "What doesn't kill me makes me stronger.", author: 'Friedrich Nietzsche' },
+
+  // Gym / last set / physical push
+  { id: 'g01', category: 'hustle', text: 'The last rep is the only one that counts.' },
+  { id: 'g02', category: 'hustle', text: 'Your body can stand almost anything. It is your mind you have to convince.' },
+  { id: 'g03', category: 'hustle', text: 'Pain is temporary. Quitting lasts forever.', author: 'Lance Armstrong' },
+  { id: 'g04', category: 'hustle', text: 'Do not stop when you are tired. Stop when you are done.' },
+
+  // Morning / first thing
+  { id: 'm01', category: 'hustle', text: 'Win the morning. Win the day.' },
+  { id: 'm02', category: 'calm', text: 'Each morning we are born again. What we do today matters most.', author: 'Buddha' },
+  { id: 'm03', category: 'stoic', text: 'Concentrate every minute on doing what is in front of you with precise and genuine seriousness.', author: 'Marcus Aurelius' },
+  { id: 'm04', category: 'hustle', text: 'Get up. Show up. Grow up.' },
+
+  // Dealing with a difficult person
+  { id: 'd01', category: 'stoic', text: 'When you wake up in the morning, tell yourself: the people I deal with today will be meddling, ungrateful, arrogant. But I have seen the beauty of good.', author: 'Marcus Aurelius' },
+  { id: 'd02', category: 'calm', text: "You can't control others. You can control your response." },
+  { id: 'd03', category: 'stoic', text: 'Respond, do not react.' },
+  { id: 'd04', category: 'calm', text: 'Hurt people hurt people. Lead with curiosity, not judgement.' },
+
+  // Wind-down / bedtime / alone time
+  { id: 'b01', category: 'calm', text: 'You did enough today. Rest is productive.' },
+  { id: 'b02', category: 'calm', text: 'Let the day go. Tomorrow is a clean slate.' },
+  { id: 'b03', category: 'calm', text: 'Silence is not empty. It is full of answers.' },
+  { id: 'b04', category: 'calm', text: 'Solitude is where I place my chaos to rest and awaken my inner peace.', author: 'Nikki Rowe' },
 ]
