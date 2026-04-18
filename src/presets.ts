@@ -1,5 +1,5 @@
 import type { Quote } from './quotes'
-import { ESSENTIALS_50 } from './quotes'
+import { ESSENTIALS } from './quotes'
 
 export interface QuotePreset {
   id: string
@@ -9,16 +9,16 @@ export interface QuotePreset {
 }
 
 const MINIMAL_2: Quote[] = [
-  { id: 'm01', category: 'hustle', text: 'Start. Figure it out on the way.' },
-  { id: 'm02', category: 'calm', text: 'This moment is all there is.' },
+  { id: 'min01', category: 'hustle', text: 'Start. Figure it out on the way.' },
+  { id: 'min02', category: 'calm', text: 'This moment is all there is.' },
 ]
 
 export const PRESETS: QuotePreset[] = [
   {
     id: 'essentials',
-    name: 'Essentials 50',
-    description: 'Fifty core quotes across stoic, hustle, and calm.',
-    quotes: ESSENTIALS_50,
+    name: 'Essentials',
+    description: 'Core quotes across stoic, hustle, calm, and situational scenarios.',
+    quotes: ESSENTIALS,
   },
   {
     id: 'minimal',

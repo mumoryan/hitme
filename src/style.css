@@ -457,6 +457,7 @@ button.primary {
 }
 
 .badge-cal { background: var(--accent-bg); color: var(--accent); }
+.badge-voice { background: #e8f5e9; color: #2e7d32; }
 .badge-random { background: #f0f0f2; color: var(--text-muted); }
 
 .history-entry {

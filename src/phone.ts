@@ -1,6 +1,6 @@
 import type { EvenAppBridge } from '@evenrealities/even_hub_sdk'
 import type { Category, Quote } from './quotes'
-import { hitMeNow } from './glasses'
+import { hitMeNow, setVoicePhrase } from './glasses'
 import {
   activeQuotes,
   addCollection,
@@ -390,7 +390,7 @@ function renderHistoryTab(root: HTMLElement): void {
   const entries = getHistory()
 
   if (entries.length === 0) {
-    panel.innerHTML = `<p class="empty">No quotes yet. Double-tap your glasses to get started.</p>`
+    panel.innerHTML = `<p class="empty">No quotes yet. Double-tap your ring to get started.</p>`
     return
   }
 
@@ -400,12 +400,14 @@ function renderHistoryTab(root: HTMLElement): void {
 function historyEntryHtml(e: HistoryEntry): string {
   const calBadge = e.source === 'calendar'
     ? `<span class="badge badge-cal" title="${escapeAttr(e.eventTitle ?? '')}">calendar</span>`
-    : `<span class="badge badge-random">random</span>`
+    : e.source === 'voice'
+      ? `<span class="badge badge-voice" title="${escapeAttr(e.eventTitle ?? '')}">voice</span>`
+      : `<span class="badge badge-random">random</span>`
   const catBadge = e.category !== 'none'
     ? `<span class="badge badge-${e.category}">${e.category}</span>`
     : ''
-  const eventLine = e.source === 'calendar' && e.eventTitle
-    ? `<p class="history-event">For: ${escapeHtml(e.eventTitle)}</p>`
+  const eventLine = (e.source === 'calendar' || e.source === 'voice') && e.eventTitle
+    ? `<p class="history-event">${e.source === 'voice' ? 'Voice:' : 'For:'} ${escapeHtml(e.eventTitle)}</p>`
     : ''
 
   return `
@@ -433,10 +435,12 @@ function renderSettings(root: HTMLElement, bridge: EvenAppBridge): void {
 
   const lastHitLog = getLastHit()
   const lastHitHtml = lastHitLog
-    ? `<p class="hint last-hit ${lastHitLog.source === 'calendar' ? 'last-hit-cal' : ''}">
+    ? `<p class="hint last-hit ${lastHitLog.source !== 'random' ? 'last-hit-cal' : ''}">
         ${lastHitLog.source === 'calendar'
           ? `Last hit: <strong>calendar</strong> — event "${escapeHtml(lastHitLog.eventTitle!)}" → "${escapeHtml(lastHitLog.quoteText.slice(0, 60))}${lastHitLog.quoteText.length > 60 ? '…' : ''}"`
-          : `Last hit: <strong>random</strong> — "${escapeHtml(lastHitLog.quoteText.slice(0, 60))}${lastHitLog.quoteText.length > 60 ? '…' : ''}"`
+          : lastHitLog.source === 'voice'
+            ? `Last hit: <strong>voice</strong> — "${escapeHtml(lastHitLog.eventTitle ?? '')}" → "${escapeHtml(lastHitLog.quoteText.slice(0, 60))}${lastHitLog.quoteText.length > 60 ? '…' : ''}"`
+            : `Last hit: <strong>random</strong> — "${escapeHtml(lastHitLog.quoteText.slice(0, 60))}${lastHitLog.quoteText.length > 60 ? '…' : ''}"`
         }
         <span class="last-hit-time">${formatTime(lastHitLog.at.getTime())}</span>
        </p>`
@@ -459,6 +463,27 @@ function renderSettings(root: HTMLElement, bridge: EvenAppBridge): void {
         </label>
       </div>
     </section>
+
+    ${devMode ? `
+    <section class="setting">
+      <h3>Voice Simulator</h3>
+      <p class="hint">Simulates "Hey Even, … Hit me" phrases. Voice context is checked before calendar events.</p>
+      <div class="form-row wrap" id="voice-presets">
+        <button class="toggle" data-phrase="I'm going on a date and I'm a bit nervous. Hit me.">Date night nerves</button>
+        <button class="toggle" data-phrase="I'm about to give a big presentation. Hit me.">Public speaking</button>
+        <button class="toggle" data-phrase="Just got rejected. Hit me.">Post-rejection</button>
+        <button class="toggle" data-phrase="Last set at the gym. Hit me.">Gym last set</button>
+        <button class="toggle" data-phrase="Just woke up and need motivation. Hit me.">Morning boost</button>
+        <button class="toggle" data-phrase="I'm at a networking event and feeling overwhelmed. Hit me.">Networking overwhelm</button>
+        <button class="toggle" data-phrase="Dealing with a really difficult person. Hit me.">Difficult person</button>
+        <button class="toggle" data-phrase="Winding down for the night. Hit me.">Bedtime wind-down</button>
+      </div>
+      <div class="form-row" style="margin-top:10px">
+        <input type="text" class="search" id="voice-custom" placeholder="Or type your own context..." style="flex:1" />
+        <button class="primary" id="voice-trigger">Trigger</button>
+      </div>
+    </section>
+    ` : ''}
 
     ${lastHitHtml}
 
@@ -514,6 +539,24 @@ function renderSettings(root: HTMLElement, bridge: EvenAppBridge): void {
   panel.querySelector<HTMLInputElement>('#dev-mode-toggle')!.addEventListener('change', e => {
     void setDevMode((e.target as HTMLInputElement).checked)
   })
+
+  panel.querySelectorAll<HTMLButtonElement>('#voice-presets [data-phrase]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setVoicePhrase(btn.dataset.phrase!)
+      void hitMeNow(bridge)
+    })
+  })
+
+  const voiceCustom = panel.querySelector<HTMLInputElement>('#voice-custom')
+  const voiceTrigger = panel.querySelector<HTMLButtonElement>('#voice-trigger')
+  if (voiceCustom && voiceTrigger) {
+    voiceTrigger.addEventListener('click', () => {
+      const phrase = voiceCustom.value.trim()
+      if (!phrase) return
+      setVoicePhrase(phrase)
+      void hitMeNow(bridge)
+    })
+  }
 
   const urlInput = panel.querySelector<HTMLInputElement>('#calendar-url')!
   urlInput.addEventListener('blur', () => {

@@ -18,7 +18,7 @@ export interface HistoryEntry {
   quoteText: string
   quoteAuthor?: string
   category: Category
-  source: 'calendar' | 'random'
+  source: 'calendar' | 'random' | 'voice'
   eventTitle?: string
   at: number
 }
