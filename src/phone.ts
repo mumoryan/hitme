@@ -8,30 +8,40 @@ import {
   allCollections,
   allPresets,
   customQuotes,
+  getCalendarUrl,
   getCooldownMs,
+  getHistory,
   getPauseUntil,
   isFavorite,
+  isDevMode,
   isOptedOut,
   isPaused,
   isPresetEnabled,
   lookupQuote,
   removeCollection,
   removeCustomQuote,
+  setCalendarUrl,
   setCooldownMs,
+  setDevMode,
   setPauseUntil,
   subscribe,
   toggleFavorite,
   toggleOptOut,
   togglePreset,
   updateCustomQuote,
+  type HistoryEntry,
 } from './state'
+import { fetchUpcomingEvents } from './calendar'
+import { getLastHit } from './glasses'
+import { hasApiKey } from './ai'
 
-type Tab = 'library' | 'presets' | 'custom' | 'settings'
+type Tab = 'library' | 'presets' | 'custom' | 'history' | 'settings'
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'library', label: 'Library' },
   { key: 'presets', label: 'Presets' },
   { key: 'custom', label: 'My Quotes' },
+  { key: 'history', label: 'History' },
   { key: 'settings', label: 'Settings' },
 ]
 
@@ -42,7 +52,8 @@ let searchQuery = ''
 let favoritesOnly = false
 const selectedCategories = new Set<Category>()
 let formText = ''
-let formCategory: Category = 'stoic'
+let formCategory: Category = 'none'
+let formAuthor = ''
 let editingId: string | null = null
 
 export function renderPhone(root: HTMLElement, bridge: EvenAppBridge): void {
@@ -56,6 +67,7 @@ export function renderPhone(root: HTMLElement, bridge: EvenAppBridge): void {
       <section id="tab-library" class="panel"></section>
       <section id="tab-presets" class="panel" hidden></section>
       <section id="tab-custom" class="panel" hidden></section>
+      <section id="tab-history" class="panel" hidden></section>
       <section id="tab-settings" class="panel" hidden></section>
     </main>
   `
@@ -63,12 +75,14 @@ export function renderPhone(root: HTMLElement, bridge: EvenAppBridge): void {
   renderLibrary(root)
   renderPresetsTab(root)
   renderCustomTab(root)
+  renderHistoryTab(root)
   renderSettings(root, bridge)
 
   subscribe(() => {
     renderLibraryList(root)
     renderPresetsTab(root)
     renderCustomList(root)
+    renderHistoryTab(root)
     renderSettings(root, bridge)
   })
 }
@@ -181,8 +195,9 @@ function renderLibraryList(root: HTMLElement): void {
     return `
       <article class="quote${opted ? ' is-opted-out' : ''}" data-id="${q.id}">
         <p class="text">${escapeHtml(q.text)}</p>
+        ${q.author ? `<p class="author">— ${escapeHtml(q.author)}</p>` : ''}
         <footer>
-          <span class="badge badge-${q.category}">${q.category}</span>
+          ${q.category !== 'none' ? `<span class="badge badge-${q.category}">${q.category}</span>` : '<span></span>'}
           <div class="actions">
             <button class="toggle${fav ? ' is-on' : ''}" data-action="fav">${fav ? '★ Good stuff' : '☆ Good stuff'}</button>
             <button class="toggle${opted ? ' is-on' : ''}" data-action="opt">${opted ? "✓ Didn't work" : "× Didn't work"}</button>
@@ -268,8 +283,10 @@ function renderCustomTab(root: HTMLElement): void {
   panel.innerHTML = `
     <form class="custom-form" id="custom-form">
       <textarea name="text" placeholder="Your quote..." maxlength="300" rows="3">${escapeHtml(formText)}</textarea>
+      <input name="author" type="text" class="author-input" placeholder="Author (optional)" maxlength="80" value="${escapeAttr(formAuthor)}" />
       <div class="form-row">
         <select name="category">
+          <option value="none" ${formCategory === 'none' ? 'selected' : ''}>No category</option>
           <option value="stoic" ${formCategory === 'stoic' ? 'selected' : ''}>Stoic</option>
           <option value="hustle" ${formCategory === 'hustle' ? 'selected' : ''}>Hustle</option>
           <option value="calm" ${formCategory === 'calm' ? 'selected' : ''}>Calm</option>
@@ -288,6 +305,7 @@ function wireCustomForm(root: HTMLElement): void {
   const form = root.querySelector<HTMLFormElement>('#custom-form')!
   const textarea = form.querySelector<HTMLTextAreaElement>('[name="text"]')!
   const select = form.querySelector<HTMLSelectElement>('[name="category"]')!
+  const authorInput = form.querySelector<HTMLInputElement>('[name="author"]')!
 
   textarea.addEventListener('input', () => {
     formText = textarea.value
@@ -295,15 +313,20 @@ function wireCustomForm(root: HTMLElement): void {
   select.addEventListener('change', () => {
     formCategory = select.value as Category
   })
+  authorInput.addEventListener('input', () => {
+    formAuthor = authorInput.value
+  })
 
   form.addEventListener('submit', async e => {
     e.preventDefault()
     const text = formText.trim()
     if (!text) return
+    const author = formAuthor.trim() || undefined
+    const category = formCategory !== 'none' ? formCategory : undefined
     if (editingId) {
-      await updateCustomQuote(editingId, { text, category: formCategory })
+      await updateCustomQuote(editingId, { text, category, author })
     } else {
-      await addCustomQuote({ text, category: formCategory })
+      await addCustomQuote({ text, category, author })
     }
     resetForm()
     renderCustomTab(root)
@@ -329,8 +352,9 @@ function renderCustomList(root: HTMLElement): void {
   list.innerHTML = quotes.map(q => `
     <article class="quote" data-id="${q.id}">
       <p class="text">${escapeHtml(q.text)}</p>
+      ${q.author ? `<p class="author">— ${escapeHtml(q.author)}</p>` : ''}
       <footer>
-        <span class="badge badge-${q.category}">${q.category}</span>
+        ${q.category !== 'none' ? `<span class="badge badge-${q.category}">${q.category}</span>` : '<span></span>'}
         <div class="actions">
           <button class="toggle" data-action="edit">Edit</button>
           <button class="toggle" data-action="delete">Delete</button>
@@ -346,7 +370,8 @@ function renderCustomList(root: HTMLElement): void {
       if (!q) return
       editingId = id
       formText = q.text
-      formCategory = q.category
+      formCategory = q.category ?? 'none'
+      formAuthor = q.author ?? ''
       renderCustomTab(root)
     })
     el.querySelector<HTMLButtonElement>('[data-action="delete"]')!.addEventListener('click', () => {
@@ -360,6 +385,42 @@ function renderCustomList(root: HTMLElement): void {
   })
 }
 
+function renderHistoryTab(root: HTMLElement): void {
+  const panel = root.querySelector<HTMLElement>('#tab-history')!
+  const entries = getHistory()
+
+  if (entries.length === 0) {
+    panel.innerHTML = `<p class="empty">No quotes yet. Double-tap your glasses to get started.</p>`
+    return
+  }
+
+  panel.innerHTML = entries.map(e => historyEntryHtml(e)).join('')
+}
+
+function historyEntryHtml(e: HistoryEntry): string {
+  const calBadge = e.source === 'calendar'
+    ? `<span class="badge badge-cal" title="${escapeAttr(e.eventTitle ?? '')}">calendar</span>`
+    : `<span class="badge badge-random">random</span>`
+  const catBadge = e.category !== 'none'
+    ? `<span class="badge badge-${e.category}">${e.category}</span>`
+    : ''
+  const eventLine = e.source === 'calendar' && e.eventTitle
+    ? `<p class="history-event">For: ${escapeHtml(e.eventTitle)}</p>`
+    : ''
+
+  return `
+    <article class="history-entry">
+      <p class="text">${escapeHtml(e.quoteText)}</p>
+      ${e.quoteAuthor ? `<p class="author">— ${escapeHtml(e.quoteAuthor)}</p>` : ''}
+      ${eventLine}
+      <footer>
+        <div class="actions">${calBadge}${catBadge}</div>
+        <span class="history-time">${formatTime(e.at)}</span>
+      </footer>
+    </article>
+  `
+}
+
 function renderSettings(root: HTMLElement, bridge: EvenAppBridge): void {
   const panel = root.querySelector<HTMLElement>('#tab-settings')!
   const cooldownHours = Math.round(getCooldownMs() / (60 * 60 * 1000) * 10) / 10
@@ -370,7 +431,57 @@ function renderSettings(root: HTMLElement, bridge: EvenAppBridge): void {
       ? 'Paused indefinitely'
       : `Paused until ${formatTime(pauseUntil)}`
 
+  const lastHitLog = getLastHit()
+  const lastHitHtml = lastHitLog
+    ? `<p class="hint last-hit ${lastHitLog.source === 'calendar' ? 'last-hit-cal' : ''}">
+        ${lastHitLog.source === 'calendar'
+          ? `Last hit: <strong>calendar</strong> — event "${escapeHtml(lastHitLog.eventTitle!)}" → "${escapeHtml(lastHitLog.quoteText.slice(0, 60))}${lastHitLog.quoteText.length > 60 ? '…' : ''}"`
+          : `Last hit: <strong>random</strong> — "${escapeHtml(lastHitLog.quoteText.slice(0, 60))}${lastHitLog.quoteText.length > 60 ? '…' : ''}"`
+        }
+        <span class="last-hit-time">${formatTime(lastHitLog.at.getTime())}</span>
+       </p>`
+    : ''
+
+  const devMode = isDevMode()
+
   panel.innerHTML = `
+    <h2 class="section-title">Integrations</h2>
+
+    <section class="setting">
+      <div class="preset" style="border:none;padding:0;background:none">
+        <div class="preset-main">
+          <h3 style="margin:0 0 2px">Dev mode</h3>
+          <p class="preset-desc">Use fake static calendar instead of your real iCal URL.</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="dev-mode-toggle" ${devMode ? 'checked' : ''} />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </section>
+
+    ${lastHitHtml}
+
+    <section class="setting ${hasApiKey() ? '' : 'setting-warn'}">
+      <h3>Claude API ${hasApiKey() ? '✓ connected' : '✗ not configured'}</h3>
+      <p class="hint">${hasApiKey()
+        ? 'Key loaded from <code>.env.local</code>. Calendar-aware quote selection is active.'
+        : 'Add <code>VITE_ANTHROPIC_API_KEY=sk-ant-…</code> to <code>.env.local</code> and restart the dev server.'
+      }</p>
+    </section>
+
+    <section class="setting">
+      <h3>Google Calendar iCal URL</h3>
+      <p class="hint">Paste your calendar's secret iCal address. Find it in Google Calendar → Settings → your calendar → "Secret address in iCal format".</p>
+      <input type="text" class="integration-input" id="calendar-url" placeholder="https://calendar.google.com/calendar/ical/..." value="${escapeAttr(getCalendarUrl())}" />
+      <div class="form-row" style="margin-top:8px">
+        <button class="toggle" id="test-calendar">Test calendar</button>
+        <span class="test-result" id="cal-result"></span>
+      </div>
+    </section>
+
+    <h2 class="section-title">Behaviour</h2>
+
     <section class="setting">
       <h3>Cooldown</h3>
       <p class="hint">How long before the same quote can hit you again. 0 = no cooldown.</p>
@@ -390,7 +501,7 @@ function renderSettings(root: HTMLElement, bridge: EvenAppBridge): void {
         <button class="toggle" data-pause="forever">Indefinitely</button>
         <button class="toggle" data-pause="resume">Resume</button>
       </div>
-      ${isPaused() ? '<p class="hint">Ring taps are ignored until you resume.</p>' : ''}
+      ${isPaused() ? '<p class="hint">Double-taps are ignored until you resume.</p>' : ''}
     </section>
 
     <section class="setting">
@@ -399,6 +510,40 @@ function renderSettings(root: HTMLElement, bridge: EvenAppBridge): void {
       <button class="primary" id="hit-now">Hit me now</button>
     </section>
   `
+
+  panel.querySelector<HTMLInputElement>('#dev-mode-toggle')!.addEventListener('change', e => {
+    void setDevMode((e.target as HTMLInputElement).checked)
+  })
+
+  const urlInput = panel.querySelector<HTMLInputElement>('#calendar-url')!
+  urlInput.addEventListener('blur', () => {
+    void setCalendarUrl(urlInput.value)
+  })
+
+  const testCalBtn = panel.querySelector<HTMLButtonElement>('#test-calendar')!
+  const calResult = panel.querySelector<HTMLElement>('#cal-result')!
+  testCalBtn.addEventListener('click', async () => {
+    const url = urlInput.value.trim()
+    if (!url && !isDevMode()) {
+      calResult.textContent = '✗ Enter a URL first (or enable Dev mode)'
+      calResult.className = 'test-result test-result-error'
+      return
+    }
+    testCalBtn.disabled = true
+    calResult.textContent = 'Checking...'
+    calResult.className = 'test-result'
+    try {
+      const events = await fetchUpcomingEvents(url, undefined, isDevMode())
+      calResult.textContent = events.length > 0
+        ? `✓ Found ${events.length} event${events.length === 1 ? '' : 's'} in the next 2h`
+        : '✓ Connected — no events in the next 2h'
+      calResult.className = 'test-result test-result-ok'
+    } catch {
+      calResult.textContent = '✗ Could not connect (check URL or CORS in browser)'
+      calResult.className = 'test-result test-result-error'
+    }
+    testCalBtn.disabled = false
+  })
 
   const cooldownInput = panel.querySelector<HTMLInputElement>('#cooldown-input')!
   cooldownInput.addEventListener('change', () => {
@@ -446,7 +591,8 @@ function formatTime(ts: number): string {
 function resetForm(): void {
   editingId = null
   formText = ''
-  formCategory = 'stoic'
+  formCategory = 'none'
+  formAuthor = ''
 }
 
 function cap(s: string): string {
