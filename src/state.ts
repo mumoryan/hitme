@@ -11,6 +11,18 @@ export interface Collection {
   quoteIds: string[]
 }
 
+const HISTORY_LIMIT = 20
+
+export interface HistoryEntry {
+  quoteId: string
+  quoteText: string
+  quoteAuthor?: string
+  category: Category
+  source: 'calendar' | 'random'
+  eventTitle?: string
+  at: number
+}
+
 interface Persisted {
   favorites: Record<string, true>
   optOuts: Record<string, true>
@@ -20,6 +32,9 @@ interface Persisted {
   collections: Collection[]
   cooldownMs: number
   pauseUntil: number | null
+  calendarUrl: string
+  devMode: boolean
+  history: HistoryEntry[]
 }
 
 function defaultState(): Persisted {
@@ -32,6 +47,9 @@ function defaultState(): Persisted {
     collections: [],
     cooldownMs: DEFAULT_COOLDOWN_MS,
     pauseUntil: null,
+    calendarUrl: '',
+    devMode: false,
+    history: [],
   }
 }
 
@@ -169,11 +187,13 @@ function newCustomId(): string {
   return `cust_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
 }
 
-export async function addCustomQuote(data: { text: string; category: Category }): Promise<Quote> {
+export async function addCustomQuote(data: { text: string; category?: Category; author?: string }): Promise<Quote> {
+  const author = data.author?.trim() || undefined
   const quote: Quote = {
     id: newCustomId(),
     text: data.text.trim(),
-    category: data.category,
+    category: data.category ?? 'none',
+    ...(author ? { author } : {}),
   }
   state.customQuotes.push(quote)
   await save()
@@ -181,11 +201,14 @@ export async function addCustomQuote(data: { text: string; category: Category })
   return quote
 }
 
-export async function updateCustomQuote(id: string, data: { text: string; category: Category }): Promise<void> {
+export async function updateCustomQuote(id: string, data: { text: string; category?: Category; author?: string }): Promise<void> {
   const existing = state.customQuotes.find(q => q.id === id)
   if (!existing) return
   existing.text = data.text.trim()
-  existing.category = data.category
+  existing.category = data.category ?? 'none'
+  const author = data.author?.trim()
+  if (author) existing.author = author
+  else delete existing.author
   await save()
   emit()
 }
@@ -231,6 +254,20 @@ export interface PickResult {
   recycled: boolean
 }
 
+export function eligibleQuotes(): Quote[] {
+  const active = activeQuotes()
+  const eligible = active.filter(q => !state.optOuts[q.id])
+  if (eligible.length === 0) return []
+  const cutoff = Date.now() - state.cooldownMs
+  const pool = eligible.filter(q => (state.lastShown[q.id] ?? 0) < cutoff)
+  return pool.length > 0 ? pool : eligible
+}
+
+export async function markShown(quoteId: string): Promise<void> {
+  state.lastShown[quoteId] = Date.now()
+  await save()
+}
+
 export async function pickNext(): Promise<PickResult | null> {
   const active = activeQuotes()
   const eligible = active.filter(q => !state.optOuts[q.id])
@@ -250,4 +287,35 @@ export async function pickNext(): Promise<PickResult | null> {
   await save()
   emit()
   return { quote, recycled }
+}
+
+export function getCalendarUrl(): string {
+  return state.calendarUrl
+}
+
+export async function setCalendarUrl(url: string): Promise<void> {
+  state.calendarUrl = url.trim()
+  await save()
+  emit()
+}
+
+export function isDevMode(): boolean {
+  return state.devMode
+}
+
+export async function setDevMode(on: boolean): Promise<void> {
+  state.devMode = on
+  await save()
+  emit()
+}
+
+export function getHistory(): HistoryEntry[] {
+  return state.history.slice()
+}
+
+export async function addToHistory(entry: HistoryEntry): Promise<void> {
+  state.history.unshift(entry)
+  if (state.history.length > HISTORY_LIMIT) state.history.length = HISTORY_LIMIT
+  await save()
+  emit()
 }

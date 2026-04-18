@@ -89,6 +89,13 @@ header h1 {
   color: var(--text-h);
 }
 
+.quote .author {
+  margin: -6px 0 10px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
 .quote footer {
   display: flex;
   justify-content: space-between;
@@ -277,6 +284,18 @@ header h1 {
   outline: none;
   border-color: var(--accent);
 }
+.custom-form .author-input {
+  font: inherit;
+  color: var(--text-h);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--bg);
+}
+.custom-form .author-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
 .form-row {
   display: flex;
   gap: 8px;
@@ -385,4 +404,88 @@ button.primary {
 }
 .form-row.wrap {
   flex-wrap: wrap;
+}
+
+.setting-warn {
+  border-color: rgba(160, 48, 48, 0.4);
+  background: rgba(160, 48, 48, 0.04);
+}
+.setting-warn h3 { color: var(--bad); }
+
+.integration-input {
+  font: inherit;
+  color: var(--text-h);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--bg);
+  width: 100%;
+  margin-top: 6px;
+}
+.integration-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.test-result {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.test-result-ok { color: var(--good); }
+.test-result-error { color: var(--bad); }
+
+.last-hit {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.last-hit-cal {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+.last-hit-time {
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge-cal { background: var(--accent-bg); color: var(--accent); }
+.badge-random { background: #f0f0f2; color: var(--text-muted); }
+
+.history-entry {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.history-entry .text {
+  margin: 0 0 6px;
+  color: var(--text-h);
+}
+.history-entry .author {
+  margin: -2px 0 6px;
+}
+.history-event {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--accent);
+}
+.history-entry footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.history-time {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
 }

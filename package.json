@@ -17,6 +17,7 @@
     "vite": "^8.0.4"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.90.0",
     "@evenrealities/even_hub_sdk": "^0.0.10"
   },
   "overrides": {
