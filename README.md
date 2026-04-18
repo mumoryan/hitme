@@ -1,3 +1,5 @@
+<img width="640" height="360" alt="image" src="https://github.com/user-attachments/assets/14c24c54-c6fe-42a9-9bd8-a155d42e12bb" />
+
 # Hitme
 
 A motivational quotes app for [Even Realities G2](https://www.evenrealities.com/) AR glasses.
