@@ -1,8 +1,12 @@
 # Hitme
 
-A simple motivational quotes app for [Even Realities G2](https://www.evenrealities.com/) AR glasses. Hits you with a quote when you double-tap the touchpad.
+A motivational quotes app for [Even Realities G2](https://www.evenrealities.com/) AR glasses.
 
-Built on the Even App WebView bridge — the app runs as a webpage hosted inside the Even App on the phone, and paints text on the G2 display via the `@evenrealities/even_hub_sdk` bridge.
+Say **“Hey Even, hit me!”** to get a quote.
+
+You can also add context (e.g. “Hey Even, I’m upset, hit me!”) to get a more relevant quote.
+
+Built using the Even App WebView bridge, rendering text on the G2 display via `@evenrealities/even_hub_sdk`.
 
 ## Requirements
 
