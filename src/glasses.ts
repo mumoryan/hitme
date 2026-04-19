@@ -43,7 +43,7 @@ function buildPlaceholder(): string {
   const emoticon = ALL_EMOTICONS[Math.floor(Math.random() * ALL_EMOTICONS.length)] ?? '( o_o )'
   const title = '\u3000\u3000\u3000\u3000\u3000\u3000\u3000\u3000\u3000ＨＩＴ　ＭＥ！'
   const footer = '                        Double-tap your ring for motivation!'
-  const pad = Math.max(0, Math.round((42 - emoticon.length) / 2))
+  const pad = Math.max(0, Math.round((320 - emoticon.length) / 2))
   const centeredEmoticon = ' '.repeat(pad) + emoticon
   return [title, '', centeredEmoticon, '', footer].join('\n')
 }
