@@ -7,6 +7,21 @@ export interface Quote {
   author?: string
 }
 
+export const CUSTOM_1: Quote[] = [
+  { id: 'cus01', category: 'calm', text: 'To see a world in a grain of sand. \nAnd a heaven in a wild flower, \nHold infinity in the palm of your hand \nAnd eternity in an hour.', author: 'William Blake - Auguries of Innocence'  },
+  { id: 'cus02', category: 'hustle', text: 'Therapists help you make peace. \nI don\'t need peace. \nI need solutions.', author: 'Guess who?'  },
+  { id: 'cus03', category: 'hustle', text: 'It\'s show time.', author: 'Saul Goodman' },
+  { id: 'cus04', category: 'stoic', text: 'Trust the work. ALWAYS trust the work' },
+  { id: 'cus05', category: 'none', text: 'Microsoft is build on trust.\n:D + thumbs up', author: 'random prev coworker' },
+  { id: 'cus06', category: 'none', text: 'The crash. Everything up till now. The brain damage, you guys, everything—it has made my life so much more real. I started thinking about all the things I was going to do. I\'d never been more excited to be alive! All that hope... wasted.', author: 'Simon - Soma' },
+  { id: 'cus07', category: 'hustle', text: 'This is about fighting.', author: 'Unamed Even hackathon attendee, 4/18/2026' },
+]
+
+export const MINIMAL_2: Quote[] = [
+  { id: 'min01', category: 'hustle', text: 'Start. Figure it out on the way.' },
+  { id: 'min02', category: 'calm', text: 'This moment is all there is.' },
+]
+
 export const ESSENTIALS: Quote[] = [
   { id: 's01', category: 'stoic', text: 'You have power over your mind, not outside events. Realize this, and you will find strength.', author: 'Marcus Aurelius' },
   { id: 's02', category: 'stoic', text: 'The obstacle is the way.', author: 'Ryan Holiday' },
