@@ -1,12 +1,12 @@
 <img width="640" height="360" alt="image" src="https://github.com/user-attachments/assets/14c24c54-c6fe-42a9-9bd8-a155d42e12bb" />
 
-# Hitme
+# ✨ Hitme
 
 A motivational quotes app for [Even Realities G2](https://www.evenrealities.com/) AR glasses.
 
-Say **“Hey Even, hit me!”** to get a quote.
-
-You can also add context (e.g. “Hey Even, I’m upset, hit me!”) to get a more relevant quote.
+✨ Say “Hey Even, hit me!” to get a quote  
+✨ Add context for more relevant responses  
+✨ Or let Hitme use your calendar for situational quotes  
 
 Built using the Even App WebView bridge, rendering text on the G2 display via `@evenrealities/even_hub_sdk`.
 
