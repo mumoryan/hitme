@@ -102,7 +102,7 @@ index.html      # Vite HTML entry
         - [x] Onboarding experience, preset 50 quotes (stoic, hustle, calm)
         - [x] Favorites: User can fav some quotes and opt out others. “good stuff”, “didn’t work”
         - [x] Frequency control: Don’t repeat the same quote within X hours
-    - [ ] Voice activated - LLM voice to text integration for simple commands “Hey Even. I’m nervous at a networking event. Hit me please” - mocked with static text input
+    - [x] Voice activated - LLM voice to text integration for simple commands “Hey Even. I’m nervous at a networking event. Hit me please” - mocked with static text input
     - [x] Timed notification (doesn’t interfere with main screen)
 - V1:
     - [x] Add monochrome icons/graphics support
