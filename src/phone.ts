@@ -491,7 +491,7 @@ function renderSettings(root: HTMLElement, bridge: EvenAppBridge): void {
       <h3>Claude API ${hasApiKey() ? '✓ connected' : '✗ not configured'}</h3>
       <p class="hint">${hasApiKey()
         ? 'Key loaded from <code>.env.local</code>. Calendar-aware quote selection is active.'
-        : 'Add <code>VITE_ANTHROPIC_API_KEY=sk-ant-…</code> to <code>.env.local</code> and restart the dev server.'
+        : 'Add <code>VITE_LLM_API_KEY=sk-ant-…</code> to <code>.env.local</code> and restart the dev server.'
       }</p>
     </section>
 

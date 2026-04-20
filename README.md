@@ -15,6 +15,10 @@ Built using the Even App WebView bridge, rendering text on the G2 display via `@
 - Node.js `^20` or `>=22`
 - An Even Realities account (for publishing via `evenhub pack`)
 - G2 glasses paired with the Even App (for on-device testing)
+- An LLM's API key (e.g. Claude) for text-to-quote mapping. Create a ```.env.local``` file under root directory and input the following
+```
+VITE_LLM_API_KEY=<insert-api-key-here>
+```
 
 ## Install
 
@@ -93,4 +97,30 @@ index.html      # Vite HTML entry
 
 ## Feature map
 
-_TBD_
+- V0 (PoC): hit me (or hit me another) -> give quote
+    - [x] App in phone to browse quotes and edit them there
+        - [x] Onboarding experience, preset 50 quotes (stoic, hustle, calm)
+        - [x] Favorites: User can fav some quotes and opt out others. “good stuff”, “didn’t work”
+        - [x] Frequency control: Don’t repeat the same quote within X hours
+    - [ ] Voice activated - LLM voice to text integration for simple commands “Hey Even. I’m nervous at a networking event. Hit me please” - mocked with static text input
+    - [x] Timed notification (doesn’t interfere with main screen)
+- V1:
+    - [x] Add monochrome icons/graphics support
+    - [x] Calendar integration: based on which event shows up in google calendar, shows a quote in that category
+        - [x] for proof of concept, used static calendar
+- V2:
+    - [ ] Move to Notion database. User can manually edit them via app or Notion
+    - [x] Add situations menu to app
+        - 😰 Overwhelmed at a networking event
+        - 🎤 Before public speaking
+        - 💔 Post-rejection (dating/job)
+        - 🏋️ Gym - last set
+        - 🌅 First thing in the morning
+        - 😤 Dealing with a difficult person
+    - [ ] Location awareness: If not at location in calendar, display generic quote
+    - [ ] Time awareness: If in morning, give intention-setting. If in afternoon, second-wind
+    - [ ] Biometrics from R1: Elevated heart rate -> calming mantras
+- V3:
+    - [ ] UGC quotes library in app. Pick what others (e.g. Will Wang) are using!
+        - [ ] Needs moderation, discovery, creator economy
+    - [ ] Add offline mode
