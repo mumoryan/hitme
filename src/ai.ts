@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { Quote } from './quotes'
 
-const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined
+const API_KEY = import.meta.env.VITE_LLM_API_KEY as string | undefined
 
 export function hasApiKey(): boolean {
   return !!API_KEY
